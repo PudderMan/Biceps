@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dziennik Postępów</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 40px; background-color: #f0f2f5; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; background-color: #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 8px; }
+        h1, h2, h3 { color: #2c3e50; }
+        .data-input { display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #fafafa; }
+        .data-input input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
+        .data-input button { padding: 12px; background-color: #3498db; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease; }
+        .data-input button:hover { background-color: #2980b9; }
+        .card-container { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px; }
+        .card { flex: 1 1 300px; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); background-color: #ecf0f1; transition: transform 0.2s ease; }
+        .card h3 { margin-top: 0; color: #34495e; }
+        .card:hover { transform: translateY(-5px); }
+        .comparison-card { background-color: #d4e6f1; border: 2px solid #3498db; }
+        .entry-list { list-style-type: none; padding: 0; }
+        .entry-list li { background-color: #f9f9f9; padding: 10px 15px; margin-bottom: 8px; border-radius: 4px; border-left: 4px solid #3498db; display: flex; justify-content: space-between; align-items: center; }
+        .delete-btn { background-color: #e74c3c; color: white; border: none; border-radius: 4px; padding: 5px 10px; cursor: pointer; font-size: 12px; }
+        .delete-btn:hover { background-color: #c0392b; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Mój Dziennik Postępów</h1>
+        
+        <div class="data-input">
+            <label for="data">Data:</label>
+            <input type="date" id="data">
+            <label for="klata">Wyciskanie na klatę (kg):</label>
+            <input type="number" id="klata">
+            <label for="biceps">Obwód bicepsa (cm):</label>
+            <input type="number" id="biceps">
+            <button onclick="zapiszDane()">Zapisz pomiary</button>
+        </div>
+
+        <h2>Podsumowanie</h2>
+        <div class="card-container" id="comparison-card"></div>
+        
+        <h2>Wszystkie wpisy</h2>
+        <div id="entries-container">
+            <ul class="entry-list" id="wpisyList"></ul>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'progressEntries';
+
+        function loadEntries() {
+            const storedEntries = localStorage.getItem(STORAGE_KEY);
+            return storedEntries ? JSON.parse(storedEntries) : [];
+        }
+
+        function saveEntries(entries) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+        }
+
+        function zapiszDane() {
+            const data = document.getElementById('data').value;
+            const klata = parseFloat(document.getElementById('klata').value);
+            const biceps = parseFloat(document.getElementById('biceps').value);
+
+            if (data && !isNaN(klata) && !isNaN(biceps)) {
+                const entries = loadEntries();
+                const nowyWpis = { data, klata, biceps };
+                entries.push(nowyWpis);
+                saveEntries(entries);
+                wyświetlWpisy();
+                wyświetlPodsumowanie();
+            } else {
+                alert("Wypełnij wszystkie pola poprawnymi wartościami!");
+            }
+        }
+
+        function usunWpis(index) {
+            const entries = loadEntries();
+            entries.splice(index, 1);
+            saveEntries(entries);
+            wyświetlWpisy();
+            wyświetlPodsumowanie();
+        }
+
+        function wyświetlWpisy() {
+            const entries = loadEntries();
+            const lista = document.getElementById('wpisyList');
+            lista.innerHTML = '';
+            
+            entries.forEach((wpis, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span>Data: ${wpis.data} | Klata: ${wpis.klata} kg | Biceps: ${wpis.biceps} cm</span>
+                    <button class="delete-btn" onclick="usunWpis(${index})">Usuń</button>
+                `;
+                lista.appendChild(li);
+            });
+        }
+
+        function wyświetlPodsumowanie() {
+            const entries = loadEntries();
+            const comparisonDiv = document.getElementById('comparison-card');
+            comparisonDiv.innerHTML = '';
+
+            if (entries.length > 1) {
+                const sortedEntries = [...entries].sort((a, b) => new Date(a.data) - new Date(b.data));
+                const pierwszyWpis = sortedEntries[0];
+                const ostatniWpis = sortedEntries[sortedEntries.length - 1];
+                
+                comparisonDiv.innerHTML = `
+                    <div class="card comparison-card">
+                        <h3>Porównanie postępów</h3>
+                        <p><strong>Początek (${pierwszyWpis.data}):</strong></p>
+                        <p>Wyciskanie na klatę: ${pierwszyWpis.klata} kg</p>
+                        <p>Obwód bicepsa: ${pierwszyWpis.biceps} cm</p>
+                        <hr>
+                        <p><strong>Koniec (${ostatniWpis.data}):</strong></p>
+                        <p>Wyciskanie na klatę: ${ostatniWpis.klata} kg</p>
+                        <p>Obwód bicepsa: ${ostatniWpis.biceps} cm</p>
+                        <hr>
+                        <p><strong>Zmiana:</strong></p>
+                        <p>Klata: ${(ostatniWpis.klata - pierwszyWpis.klata).toFixed(2)} kg</p>
+                        <p>Biceps: ${(ostatniWpis.biceps - pierwszyWpis.biceps).toFixed(2)} cm</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Uruchomienie funkcji przy ładowaniu strony
+        window.onload = () => {
+            wyświetlWpisy();
+            wyświetlPodsumowanie();
+        };
+
+    </script>
+
+</body>
+</html>
