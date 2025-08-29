@@ -19,10 +19,22 @@
             <h2>Wpisz nowe dane</h2>
             <label for="data">Data:</label>
             <input type="date" id="data">
-            <label for="klata">Wyciskanie na klatę (kg):</label>
+            
+            <label for="klata">Wyciskanie na ławce płaskiej (kg):</label>
             <input type="number" id="klata">
-            <label for="biceps">Obwód bicepsa (cm):</label>
-            <input type="number" id="biceps">
+            
+            <label for="klata-skos">Wyciskanie na ławce skośnej (kg):</label>
+            <input type="number" id="klata-skos">
+            
+            <label for="martwy-ciag">Martwy ciąg (kg):</label>
+            <input type="number" id="martwy-ciag">
+
+            <label for="biceps-ug">Uginanie sztangi na biceps (kg):</label>
+            <input type="number" id="biceps-ug">
+            
+            <label for="biceps-obw">Obwód bicepsa (cm):</label>
+            <input type="number" id="biceps-obw">
+
             <button onclick="zapiszDane()">Zapisz pomiary</button>
         </div>
     </div>
@@ -33,17 +45,23 @@
         function zapiszDane() {
             const data = document.getElementById('data').value;
             const klata = parseFloat(document.getElementById('klata').value);
-            const biceps = parseFloat(document.getElementById('biceps').value);
+            const klataSkos = parseFloat(document.getElementById('klata-skos').value);
+            const martwyCiag = parseFloat(document.getElementById('martwy-ciag').value);
+            const bicepsUg = parseFloat(document.getElementById('biceps-ug').value);
+            const bicepsObw = parseFloat(document.getElementById('biceps-obw').value);
 
-            if (data && !isNaN(klata) && !isNaN(biceps)) {
+            if (data && !isNaN(klata) && !isNaN(klataSkos) && !isNaN(martwyCiag) && !isNaN(bicepsUg) && !isNaN(bicepsObw)) {
                 const entries = loadEntries();
-                const nowyWpis = { data, klata, biceps };
+                const nowyWpis = { data, klata, klataSkos, martwyCiag, bicepsUg, bicepsObw };
                 entries.push(nowyWpis);
                 saveEntries(entries);
                 alert('Dane zostały zapisane!');
                 document.getElementById('data').value = '';
                 document.getElementById('klata').value = '';
-                document.getElementById('biceps').value = '';
+                document.getElementById('klata-skos').value = '';
+                document.getElementById('martwy-ciag').value = '';
+                document.getElementById('biceps-ug').value = '';
+                document.getElementById('biceps-obw').value = '';
             } else {
                 alert("Wypełnij wszystkie pola poprawnymi wartościami!");
             }
