@@ -20,6 +20,12 @@
             <label for="data">Data:</label>
             <input type="date" id="data">
             
+            <label for="waga">Waga (kg):</label>
+            <input type="number" id="waga">
+
+            <label for="wzrost">Wzrost (cm):</label>
+            <input type="number" id="wzrost">
+
             <label for="klata">Wyciskanie na ławce płaskiej (kg):</label>
             <input type="number" id="klata">
             
@@ -44,19 +50,23 @@
 
         function zapiszDane() {
             const data = document.getElementById('data').value;
+            const waga = parseFloat(document.getElementById('waga').value);
+            const wzrost = parseFloat(document.getElementById('wzrost').value);
             const klata = parseFloat(document.getElementById('klata').value);
             const klataSkos = parseFloat(document.getElementById('klata-skos').value);
             const martwyCiag = parseFloat(document.getElementById('martwy-ciag').value);
             const bicepsUg = parseFloat(document.getElementById('biceps-ug').value);
             const bicepsObw = parseFloat(document.getElementById('biceps-obw').value);
 
-            if (data && !isNaN(klata) && !isNaN(klataSkos) && !isNaN(martwyCiag) && !isNaN(bicepsUg) && !isNaN(bicepsObw)) {
+            if (data && !isNaN(waga) && !isNaN(wzrost) && !isNaN(klata) && !isNaN(klataSkos) && !isNaN(martwyCiag) && !isNaN(bicepsUg) && !isNaN(bicepsObw)) {
                 const entries = loadEntries();
-                const nowyWpis = { data, klata, klataSkos, martwyCiag, bicepsUg, bicepsObw };
+                const nowyWpis = { data, waga, wzrost, klata, klataSkos, martwyCiag, bicepsUg, bicepsObw };
                 entries.push(nowyWpis);
                 saveEntries(entries);
                 alert('Dane zostały zapisane!');
                 document.getElementById('data').value = '';
+                document.getElementById('waga').value = '';
+                document.getElementById('wzrost').value = '';
                 document.getElementById('klata').value = '';
                 document.getElementById('klata-skos').value = '';
                 document.getElementById('martwy-ciag').value = '';
