@@ -1,48 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dziennik Postępów - Wpisz dane</title>
+    <title>Dziennik Postępów - Wyniki</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="container">
-        <h1>Dziennik Postępów</h1>
+        <h1>Twoje wyniki</h1>
         
         <nav class="nav-bar">
-            <a href="index.html" class="nav-link active">Wpisz dane</a>
-            <a href="results.html" class="nav-link">Wyniki</a>
+            <a href="index.html" class="nav-link">Wpisz dane</a>
+            <a href="results.html" class="nav-link active">Wyniki</a>
             <a href="plan.html" class="nav-link">Plan</a>
         </nav>
         
-        <div class="data-input">
-            <h2>Wpisz nowe dane</h2>
-            <label for="data">Data:</label>
-            <input type="date" id="data">
-            
-            <label for="waga">Waga (kg):</label>
-            <input type="number" id="waga">
-
-            <label for="wzrost">Wzrost (cm):</label>
-            <input type="number" id="wzrost">
-
-            <label for="klata">Wyciskanie na ławce płaskiej (kg):</label>
-            <input type="number" id="klata">
-            
-            <label for="klata-skos">Wyciskanie na ławce skośnej (kg):</label>
-            <input type="number" id="klata-skos">
-            
-            <label for="martwy-ciag">Martwy ciąg (kg):</label>
-            <input type="number" id="martwy-ciag">
-
-            <label for="biceps-ug">Uginanie sztangi na biceps (kg):</label>
-            <input type="number" id="biceps-ug">
-            
-            <label for="biceps-obw">Obwód bicepsa (cm):</label>
-            <input type="number" id="biceps-obw">
-
-            <button onclick="zapiszDane()">Zapisz pomiary</button>
-        </div>
+        <h2>Podsumowanie</h2>
+        <div class="card-container" id="comparison-card"></div>
+        
+        <h2>Wszystkie wpisy</h2>
+        <ul class="entry-list" id="wpisyList"></ul>
     </div>
 
     <script>
@@ -50,21 +27,21 @@
         const DB_VERSION = 1;
         let db;
 
+        // Funkcja do otwierania bazy danych
         function openDatabase() {
             return new Promise((resolve, reject) => {
                 const request = indexedDB.open(DB_NAME, DB_VERSION);
-
                 request.onupgradeneeded = (event) => {
-                    db = event.target.result;
-                    const objectStore = db.createObjectStore('entries', { keyPath: 'id', autoIncrement: true });
-                    objectStore.createIndex('data', 'data', { unique: false });
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains('entries')) {
+                        const objectStore = db.createObjectStore('entries', { keyPath: 'id', autoIncrement: true });
+                        objectStore.createIndex('data', 'data', { unique: false });
+                    }
                 };
-
                 request.onsuccess = (event) => {
                     db = event.target.result;
                     resolve(db);
                 };
-
                 request.onerror = (event) => {
                     console.error("IndexedDB error:", event.target.errorCode);
                     reject("Database error");
@@ -72,50 +49,106 @@
             });
         }
 
-        async function zapiszDane() {
-            const data = document.getElementById('data').value;
-            const waga = parseFloat(document.getElementById('waga').value);
-            const wzrost = parseFloat(document.getElementById('wzrost').value);
-            const klata = parseFloat(document.getElementById('klata').value);
-            const klataSkos = parseFloat(document.getElementById('klata-skos').value);
-            const martwyCiag = parseFloat(document.getElementById('martwy-ciag').value);
-            const bicepsUg = parseFloat(document.getElementById('biceps-ug').value);
-            const bicepsObw = parseFloat(document.getElementById('biceps-obw').value);
-
-            if (data && !isNaN(waga) && !isNaN(wzrost) && !isNaN(klata) && !isNaN(klataSkos) && !isNaN(martwyCiag) && !isNaN(bicepsUg) && !isNaN(bicepsObw)) {
-                const nowyWpis = { data, waga, wzrost, klata, klataSkos, martwyCiag, bicepsUg, bicepsObw };
+        // Funkcja do ładowania wpisów z bazy
+        async function loadEntries() {
+            try {
+                const transaction = db.transaction(['entries'], 'readonly');
+                const objectStore = transaction.objectStore('entries');
+                const request = objectStore.getAll();
                 
-                try {
-                    const db = await openDatabase();
-                    const transaction = db.transaction(['entries'], 'readwrite');
-                    const objectStore = transaction.objectStore('entries');
-                    const request = objectStore.add(nowyWpis);
-
-                    request.onsuccess = () => {
-                        alert('Dane zostały zapisane!');
-                        document.getElementById('data').value = '';
-                        document.getElementById('waga').value = '';
-                        document.getElementById('wzrost').value = '';
-                        document.getElementById('klata').value = '';
-                        document.getElementById('klata-skos').value = '';
-                        document.getElementById('martwy-ciag').value = '';
-                        document.getElementById('biceps-ug').value = '';
-                        document.getElementById('biceps-obw').value = '';
+                return new Promise((resolve) => {
+                    request.onsuccess = (event) => {
+                        resolve(event.target.result);
                     };
-                    request.onerror = (event) => {
-                        console.error("Add request error:", event.target.error);
-                        alert("Wystąpił błąd podczas zapisywania danych.");
-                    };
-                } catch (error) {
-                    console.error("Database operation error:", error);
-                }
-            } else {
-                alert("Wypełnij wszystkie pola poprawnymi wartościami!");
+                });
+            } catch (error) {
+                console.error("Load entries error:", error);
+                return [];
             }
         }
 
-        window.onload = () => {
-            openDatabase();
+        // Funkcja do usuwania wpisu
+        async function usunWpis(id) {
+            try {
+                const transaction = db.transaction(['entries'], 'readwrite');
+                const objectStore = transaction.objectStore('entries');
+                const request = objectStore.delete(id);
+
+                request.onsuccess = () => {
+                    wyświetlWpisy();
+                    wyświetlPodsumowanie();
+                };
+            } catch (error) {
+                console.error("Delete entry error:", error);
+            }
+        }
+
+        // Funkcja do wyświetlania wszystkich wpisów
+        async function wyświetlWpisy() {
+            const entries = await loadEntries();
+            const lista = document.getElementById('wpisyList');
+            lista.innerHTML = '';
+            
+            entries.forEach((wpis) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span>Data: ${wpis.data}</span>
+                    <span>Waga: ${wpis.waga} kg</span>
+                    <span>Wzrost: ${wpis.wzrost} cm</span>
+                    <span>Wyciskanie na ławce: ${wpis.klata} kg</span>
+                    <span>Wyciskanie na skosie: ${wpis.klataSkos} kg</span>
+                    <span>Martwy ciąg: ${wpis.martwyCiag} kg</span>
+                    <span>Uginanie sztangi: ${wpis.bicepsUg} kg</span>
+                    <span>Obwód bicepsa: ${wpis.bicepsObw} cm</span>
+                    <button class="delete-btn" onclick="usunWpis(${wpis.id})">Usuń</button>
+                `;
+                lista.appendChild(li);
+            });
+        }
+
+        // Funkcja do wyświetlania podsumowania
+        async function wyświetlPodsumowanie() {
+            const entries = await loadEntries();
+            const comparisonDiv = document.getElementById('comparison-card');
+            comparisonDiv.innerHTML = '';
+
+            if (entries.length > 1) {
+                const sortedEntries = [...entries].sort((a, b) => new Date(a.data) - new Date(b.data));
+                const pierwszyWpis = sortedEntries[0];
+                const ostatniWpis = sortedEntries[sortedEntries.length - 1];
+                
+                comparisonDiv.innerHTML = `
+                    <div class="card comparison-card">
+                        <h3>Porównanie postępów</h3>
+                        <p><strong>Początek (${pierwszyWpis.data}):</strong></p>
+                        <p>Waga: ${pierwszyWpis.waga} kg</p>
+                        <p>Wyciskanie na klatę: ${pierwszyWpis.klata} kg</p>
+                        <p>Wyciskanie na skosie: ${pierwszyWpis.klataSkos} kg</p>
+                        <p>Martwy ciąg: ${pierwszyWpis.martwyCiag} kg</p>
+                        <p>Uginanie sztangi: ${pierwszyWpis.bicepsUg} kg</p>
+                        <p>Obwód bicepsa: ${pierwszyWpis.bicepsObw} cm</p>
+                        <hr>
+                        <p><strong>Koniec (${ostatniWpis.data}):</strong></p>
+                        <p>Waga: ${ostatniWpis.waga} kg</p>
+                        <p>Wyciskanie na klatę: ${ostatniWpis.klata} kg</p>
+                        <p>Wyciskanie na skosie: ${ostatniWpis.klataSkos} kg</p>
+                        <p>Martwy ciąg: ${ostatniWpis.martwyCiag} kg</p>
+                        <p>Uginanie sztangi: ${ostatniWpis.bicepsUg} kg</p>
+                        <p>Obwód bicepsa: ${ostatniWpis.bicepsObw} cm</p>
+                        <hr>
+                        <p><strong>Zmiana:</strong></p>
+                        <p>Waga: ${(ostatniWpis.waga - pierwszyWpis.waga).toFixed(2)} kg</p>
+                        <p>Klata: ${(ostatniWpis.klata - pierwszyWpis.klata).toFixed(2)} kg</p>
+                        <p>Biceps: ${(ostatniWpis.bicepsObw - pierwszyWpis.bicepsObw).toFixed(2)} cm</p>
+                    </div>
+                `;
+            }
+        }
+
+        window.onload = async () => {
+            await openDatabase();
+            wyświetlWpisy();
+            wyświetlPodsumowanie();
         };
     </script>
 
