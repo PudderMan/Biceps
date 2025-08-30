@@ -1,72 +1,123 @@
-<script>
-    const DB_NAME = 'progressDB';
-    const DB_VERSION = 1;
-    let db;
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dziennik Postępów - Wpisz dane</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-    // Funkcja do otwierania/tworzenia bazy danych
-    function openDatabase() {
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-            request.onupgradeneeded = (event) => {
-                db = event.target.result;
-                const objectStore = db.createObjectStore('entries', { keyPath: 'id', autoIncrement: true });
-                // Tworzenie indeksów, aby wyszukiwanie było szybsze
-                objectStore.createIndex('data', 'data', { unique: false });
-            };
-
-            request.onsuccess = (event) => {
-                db = event.target.result;
-                resolve(db);
-            };
-
-            request.onerror = (event) => {
-                console.error("IndexedDB error:", event.target.errorCode);
-                reject("Database error");
-            };
-        });
-    }
-
-    // Funkcja do zapisywania danych w bazie
-    async function zapiszDane() {
-        const data = document.getElementById('data').value;
-        const waga = parseFloat(document.getElementById('waga').value);
-        const wzrost = parseFloat(document.getElementById('wzrost').value);
-        const klata = parseFloat(document.getElementById('klata').value);
-        const klataSkos = parseFloat(document.getElementById('klata-skos').value);
-        const martwyCiag = parseFloat(document.getElementById('martwy-ciag').value);
-        const bicepsUg = parseFloat(document.getElementById('biceps-ug').value);
-        const bicepsObw = parseFloat(document.getElementById('biceps-obw').value);
-
-        if (data && !isNaN(waga) && !isNaN(wzrost) && !isNaN(klata) && !isNaN(klataSkos) && !isNaN(martwyCiag) && !isNaN(bicepsUg) && !isNaN(bicepsObw)) {
-            const nowyWpis = { data, waga, wzrost, klata, klataSkos, martwyCiag, bicepsUg, bicepsObw };
+    <div class="container">
+        <h1>Dziennik Postępów</h1>
+        
+        <nav class="nav-bar">
+            <a href="index.html" class="nav-link active">Wpisz dane</a>
+            <a href="results.html" class="nav-link">Wyniki</a>
+            <a href="plan.html" class="nav-link">Plan</a>
+        </nav>
+        
+        <div class="data-input">
+            <h2>Wpisz nowe dane</h2>
+            <label for="data">Data:</label>
+            <input type="date" id="data">
             
-            try {
-                const db = await openDatabase();
-                const transaction = db.transaction(['entries'], 'readwrite');
-                const objectStore = transaction.objectStore('entries');
-                const request = objectStore.add(nowyWpis);
+            <label for="waga">Waga (kg):</label>
+            <input type="number" id="waga">
 
-                request.onsuccess = () => {
-                    alert('Dane zostały zapisane!');
-                    document.getElementById('data').value = '';
-                    document.getElementById('waga').value = '';
-                    document.getElementById('wzrost').value = '';
-                    document.getElementById('klata').value = '';
-                    document.getElementById('klata-skos').value = '';
-                    document.getElementById('martwy-ciag').value = '';
-                    document.getElementById('biceps-ug').value = '';
-                    document.getElementById('biceps-obw').value = '';
+            <label for="wzrost">Wzrost (cm):</label>
+            <input type="number" id="wzrost">
+
+            <label for="klata">Wyciskanie na ławce płaskiej (kg):</label>
+            <input type="number" id="klata">
+            
+            <label for="klata-skos">Wyciskanie na ławce skośnej (kg):</label>
+            <input type="number" id="klata-skos">
+            
+            <label for="martwy-ciag">Martwy ciąg (kg):</label>
+            <input type="number" id="martwy-ciag">
+
+            <label for="biceps-ug">Uginanie sztangi na biceps (kg):</label>
+            <input type="number" id="biceps-ug">
+            
+            <label for="biceps-obw">Obwód bicepsa (cm):</label>
+            <input type="number" id="biceps-obw">
+
+            <button onclick="zapiszDane()">Zapisz pomiary</button>
+        </div>
+    </div>
+
+    <script>
+        const DB_NAME = 'progressDB';
+        const DB_VERSION = 1;
+        let db;
+
+        function openDatabase() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+                request.onupgradeneeded = (event) => {
+                    db = event.target.result;
+                    const objectStore = db.createObjectStore('entries', { keyPath: 'id', autoIncrement: true });
+                    objectStore.createIndex('data', 'data', { unique: false });
                 };
+
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    resolve(db);
+                };
+
                 request.onerror = (event) => {
-                    console.error("Add request error:", event.target.error);
-                    alert("Wystąpił błąd podczas zapisywania danych.");
+                    console.error("IndexedDB error:", event.target.errorCode);
+                    reject("Database error");
                 };
-            } catch (error) {
-                console.error("Database operation error:", error);
-            }
-        } else {
-            alert("Wypełnij wszystkie pola poprawnymi wartościami!");
+            });
         }
-    }
-</script>
+
+        async function zapiszDane() {
+            const data = document.getElementById('data').value;
+            const waga = parseFloat(document.getElementById('waga').value);
+            const wzrost = parseFloat(document.getElementById('wzrost').value);
+            const klata = parseFloat(document.getElementById('klata').value);
+            const klataSkos = parseFloat(document.getElementById('klata-skos').value);
+            const martwyCiag = parseFloat(document.getElementById('martwy-ciag').value);
+            const bicepsUg = parseFloat(document.getElementById('biceps-ug').value);
+            const bicepsObw = parseFloat(document.getElementById('biceps-obw').value);
+
+            if (data && !isNaN(waga) && !isNaN(wzrost) && !isNaN(klata) && !isNaN(klataSkos) && !isNaN(martwyCiag) && !isNaN(bicepsUg) && !isNaN(bicepsObw)) {
+                const nowyWpis = { data, waga, wzrost, klata, klataSkos, martwyCiag, bicepsUg, bicepsObw };
+                
+                try {
+                    const db = await openDatabase();
+                    const transaction = db.transaction(['entries'], 'readwrite');
+                    const objectStore = transaction.objectStore('entries');
+                    const request = objectStore.add(nowyWpis);
+
+                    request.onsuccess = () => {
+                        alert('Dane zostały zapisane!');
+                        document.getElementById('data').value = '';
+                        document.getElementById('waga').value = '';
+                        document.getElementById('wzrost').value = '';
+                        document.getElementById('klata').value = '';
+                        document.getElementById('klata-skos').value = '';
+                        document.getElementById('martwy-ciag').value = '';
+                        document.getElementById('biceps-ug').value = '';
+                        document.getElementById('biceps-obw').value = '';
+                    };
+                    request.onerror = (event) => {
+                        console.error("Add request error:", event.target.error);
+                        alert("Wystąpił błąd podczas zapisywania danych.");
+                    };
+                } catch (error) {
+                    console.error("Database operation error:", error);
+                }
+            } else {
+                alert("Wypełnij wszystkie pola poprawnymi wartościami!");
+            }
+        }
+
+        window.onload = () => {
+            openDatabase();
+        };
+    </script>
+
+</body>
+</html>
