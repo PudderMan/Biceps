@@ -53,8 +53,11 @@
                     <span>Data: ${wpis.data}</span>
                     <span>Waga: ${wpis.waga} kg</span>
                     <span>Wzrost: ${wpis.wzrost} cm</span>
-                    <span>Klata: ${wpis.klata} kg</span>
-                    <span>Biceps: ${wpis.bicepsObw} cm</span>
+                    <span>Wyciskanie na ławce: ${wpis.klata} kg</span>
+                    <span>Wyciskanie na skosie: ${wpis.klataSkos} kg</span>
+                    <span>Martwy ciąg: ${wpis.martwyCiag} kg</span>
+                    <span>Uginanie sztangi: ${wpis.bicepsUg} kg</span>
+                    <span>Obwód bicepsa: ${wpis.bicepsObw} cm</span>
                     <button class="delete-btn" onclick="usunWpis(${index})">Usuń</button>
                 `;
                 lista.appendChild(li);
@@ -77,11 +80,17 @@
                         <p><strong>Początek (${pierwszyWpis.data}):</strong></p>
                         <p>Waga: ${pierwszyWpis.waga} kg</p>
                         <p>Wyciskanie na klatę: ${pierwszyWpis.klata} kg</p>
+                        <p>Wyciskanie na skosie: ${pierwszyWpis.klataSkos} kg</p>
+                        <p>Martwy ciąg: ${pierwszyWpis.martwyCiag} kg</p>
+                        <p>Uginanie sztangi: ${pierwszyWpis.bicepsUg} kg</p>
                         <p>Obwód bicepsa: ${pierwszyWpis.bicepsObw} cm</p>
                         <hr>
                         <p><strong>Koniec (${ostatniWpis.data}):</strong></p>
                         <p>Waga: ${ostatniWpis.waga} kg</p>
                         <p>Wyciskanie na klatę: ${ostatniWpis.klata} kg</p>
+                        <p>Wyciskanie na skosie: ${ostatniWpis.klataSkos} kg</p>
+                        <p>Martwy ciąg: ${ostatniWpis.martwyCiag} kg</p>
+                        <p>Uginanie sztangi: ${ostatniWpis.bicepsUg} kg</p>
                         <p>Obwód bicepsa: ${ostatniWpis.bicepsObw} cm</p>
                         <hr>
                         <p><strong>Zmiana:</strong></p>
