@@ -29,9 +29,6 @@
             <label for="klata">Wyciskanie na ławce płaskiej (kg):</label>
             <input type="number" id="klata">
             
-            <label for="klata-skos">Wyciskanie na ławce skośnej (kg):</label>
-            <input type="number" id="klata-skos">
-            
             <label for="martwy-ciag">Martwy ciąg (kg):</label>
             <input type="number" id="martwy-ciag">
 
@@ -77,7 +74,6 @@
             const waga = parseFloat(document.getElementById('waga').value);
             const wzrost = parseFloat(document.getElementById('wzrost').value);
             const klata = parseFloat(document.getElementById('klata').value);
-            const klataSkos = parseFloat(document.getElementById('klata-skos').value);
             const martwyCiag = parseFloat(document.getElementById('martwy-ciag').value);
             const bicepsUg = parseFloat(document.getElementById('biceps-ug').value);
             const bicepsObw = parseFloat(document.getElementById('biceps-obw').value);
@@ -97,7 +93,6 @@
                         document.getElementById('waga').value = '';
                         document.getElementById('wzrost').value = '';
                         document.getElementById('klata').value = '';
-                        document.getElementById('klata-skos').value = '';
                         document.getElementById('martwy-ciag').value = '';
                         document.getElementById('biceps-ug').value = '';
                         document.getElementById('biceps-obw').value = '';
