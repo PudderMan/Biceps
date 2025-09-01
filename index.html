@@ -78,8 +78,8 @@
             const bicepsUg = parseFloat(document.getElementById('biceps-ug').value);
             const bicepsObw = parseFloat(document.getElementById('biceps-obw').value);
 
-            if (data && !isNaN(waga) && !isNaN(wzrost) && !isNaN(klata) && !isNaN(klataSkos) && !isNaN(martwyCiag) && !isNaN(bicepsUg) && !isNaN(bicepsObw)) {
-                const nowyWpis = { data, waga, wzrost, klata, klataSkos, martwyCiag, bicepsUg, bicepsObw };
+            if (data && !isNaN(waga) && !isNaN(wzrost) && !isNaN(klata) && !isNaN(martwyCiag) && !isNaN(bicepsUg) && !isNaN(bicepsObw)) {
+                const nowyWpis = { data, waga, wzrost, klata, martwyCiag, bicepsUg, bicepsObw };
                 
                 try {
                     const db = await openDatabase();
